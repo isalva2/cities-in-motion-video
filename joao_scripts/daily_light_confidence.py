@@ -58,18 +58,18 @@ DATASETS = {
 }
 
 # ── Change only this line to switch dataset ───────────────────────────────────
-ACTIVE_DATASET = "W065_08-17-2025"
+ACTIVE_DATASET = "W042_08-09-2025"
 # ─────────────────────────────────────────────────────────────────────────────
 
 JSONL_PATH  = Path(DATASETS[ACTIVE_DATASET]["jsonl_path"])
 OUT_DIR     = BASE_OUT / ACTIVE_DATASET
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
-LOCAL_TZ        = ZoneInfo("America/Chicago")
+LOCAL_TZ          = ZoneInfo("America/Chicago")
 SAMPLE_PER_PERIOD = 1500    # dots shown in scatter per panel (performance)
 ROLLING_WINDOW    = 400     # detections per rolling mean window
 
-# =========================================================I ====================
+# =============================================================================
 # LIGHTING PERIOD DEFINITIONS
 # =============================================================================
 
@@ -159,17 +159,18 @@ sample = pd.concat(sample_parts, ignore_index=True)
 # PLOT
 # =============================================================================
 
-fig = plt.figure(figsize=(18, 14), facecolor="white")
+scale = 0.55
+fig = plt.figure(figsize=(23 * scale, 14 * scale), facecolor="white")
 fig.suptitle(
     "Confidence vs. Bounding Box Area  —  stratified by lighting period\n"
     f"{ACTIVE_DATASET}  |  Chicago (CST)  |  all YOLO models combined",
-    fontsize=13, fontweight="bold", color="#1a1a1a", y=0.98,
+    fontsize=13, fontweight="bold", color="#1a1a1a", y=1.00,
 )
 
-gs     = gridspec.GridSpec(2, 3, hspace=0.42, wspace=0.28,
-                           left=0.07, right=0.97, top=0.92, bottom=0.08)
-axes   = [fig.add_subplot(gs[r, c]) for r, c in [(0,0),(0,1),(0,2),(1,0),(1,1)]]
-leg_ax = fig.add_subplot(gs[1, 2])
+gs     = gridspec.GridSpec(2, 5, hspace=0.55, wspace=0.18,
+                           left=0.07, right=0.97, top=0.85, bottom=0.18)
+axes   = [fig.add_subplot(gs[0, c]) for c in range(5)]
+leg_ax = fig.add_subplot(gs[1, :])
 leg_ax.set_facecolor("white")
 leg_ax.axis("off")
 
@@ -177,7 +178,7 @@ leg_ax.axis("off")
 print(f"{'Period':<26} {'n':>8} {'mean_conf':>10} {'r':>7} {'slope':>8} {'p':>10}")
 print("─" * 73)
 
-for ax, period in zip(axes, PERIOD_ORDER):
+for i, (ax, period) in enumerate(zip(axes, PERIOD_ORDER)):
     col  = PERIOD_COLORS[period]
     sub  = sample[sample["period"] == period]
     full = df[df["period"] == period]
@@ -220,10 +221,16 @@ for ax, period in zip(axes, PERIOD_ORDER):
     # Labels & annotations
     ax.set_title(period, fontsize=10, fontweight="bold", color=col, pad=5)
     ax.set_xlabel("log₁₀(bbox area, px²)", fontsize=8.5, color="black")
-    ax.set_ylabel("Confidence",            fontsize=8.5, color="black")
     ax.set_ylim(0, 1.05)
     ax.tick_params(colors="black", labelsize=8)
     ax.grid(alpha=0.10, color="#cccccc")
+
+    # Y-axis label and tick labels only on the first plot
+    if i == 0:
+        ax.set_ylabel("Confidence", fontsize=8.5, color="black")
+    else:
+        ax.set_ylabel("")
+        ax.tick_params(labelleft=False)
 
     ax.text(0.04, 0.94, f"r = {r_val:.3f}   slope = {slope:.3f}",
             transform=ax.transAxes, fontsize=8.5, color="#222222")
@@ -235,11 +242,7 @@ for ax, period in zip(axes, PERIOD_ORDER):
     print(f"{period:<26} {len(full):>8,} {full['confidence'].mean():>10.3f} "
           f"{r_val:>7.3f} {slope:>8.4f} {p_val:>10.2e}")
 
-# ── Reading guide panel ───────────────────────────────────────────────────────
-leg_ax.text(0.08, 0.96, "Reading guide",
-            fontsize=10, fontweight="bold", color="#1a1a1a",
-            transform=leg_ax.transAxes, va="top")
-
+# ── Reading guide panel (below all plots) ────────────────────────────────────
 guide_items = [
     ("dots",        f"Individual detections (≤{SAMPLE_PER_PERIOD:,} sampled / period)"),
     ("dashed line", "OLS regression — overall size↔confidence trend"),
@@ -249,12 +252,21 @@ guide_items = [
     ("slope =",     "Confidence gain per log₁₀ area unit"),
     ("μ =",         "Mean confidence for the period"),
 ]
+
+leg_ax.text(0.00, 0.95, "Reading guide",
+            fontsize=10, fontweight="bold", color="#1a1a1a",
+            transform=leg_ax.transAxes, va="top")
+
+# 7 items laid out across two columns
+items_per_col = 4
 for i, (lbl, desc) in enumerate(guide_items):
-    y = 0.82 - i * 0.11
-    leg_ax.text(0.08, y,      lbl,  fontsize=8.5, color="#1a1a1a",
-                fontweight="bold", transform=leg_ax.transAxes)
-    leg_ax.text(0.08, y-0.05, desc, fontsize=7.8, color="#444444",
-                transform=leg_ax.transAxes)
+    col_offset = 0.00 if i < items_per_col else 0.50
+    row        = i    if i < items_per_col else i - items_per_col
+    y          = 0.78 - row * 0.22
+    leg_ax.text(col_offset,        y,        lbl,  fontsize=8.5, fontweight="bold",
+                color="#1a1a1a", transform=leg_ax.transAxes)
+    leg_ax.text(col_offset + 0.01, y - 0.12, desc, fontsize=7.8,
+                color="#444444", transform=leg_ax.transAxes)
 
 # ── Save ──────────────────────────────────────────────────────────────────────
 out = OUT_DIR / "analysis1_confidence_vs_bbox_by_period.png"
