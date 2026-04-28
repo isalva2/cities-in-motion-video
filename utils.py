@@ -1,5 +1,6 @@
 import json
 import os
+import pandas as pd
 from pathlib import Path
 from typing import Dict, List, Tuple
 
@@ -27,7 +28,7 @@ def get_image_file_names(image_path:os.PathLike)-> Tuple[List[Path], List[str], 
     timestamp_ns = [file_name.split("-")[0] for file_name in file_names]
     return file_paths, file_names, timestamp_ns
 
-def get_hashed_image_jsonl_data(data_path:os.PathLike):
+def get_hashed_image_jsonl_data(data_path:os.PathLike, all=False):
     DATA_PATH = Path(data_path)
     JSONL_PATH = next((DATA_PATH / f"data/").glob("*.jsonl"))
     IMAGE_PATH = DATA_PATH / "images/"
@@ -39,9 +40,40 @@ def get_hashed_image_jsonl_data(data_path:os.PathLike):
     for jsonl_line in jsonl_data:
         try:
             jsonl_timestamp_ns = str(jsonl_line["value"].get("image_timestamp_ns"))
-            if jsonl_timestamp_ns in image_timestamps_ns:
+            if all:
+                hashed_timestamp_ns_jsonl_data[jsonl_timestamp_ns] = jsonl_line
+            elif jsonl_timestamp_ns in image_timestamps_ns:
                 hashed_timestamp_ns_jsonl_data[jsonl_timestamp_ns] = jsonl_line
         except (AttributeError):
             pass
 
     return hashed_timestamp_ns_jsonl_data
+
+def get_detections_df(data_path: os.PathLike)->pd.DataFrame:
+    DATA_PATH = Path(data_path)
+    IMAGE_PATH = DATA_PATH / "images"
+
+    file_paths, file_names, timestamps_ns = get_image_file_names(IMAGE_PATH)
+    hashed_jsonl_data = get_hashed_image_jsonl_data(DATA_PATH, all=True)
+
+    detection_disaggregation = []
+    for jsonl_line in list(hashed_jsonl_data.values())[:]:
+        try:
+            for model_name, results in jsonl_line.get("value").get("models_results").items():
+                for detection in results.get("detections"):
+                    bbox = detection.get("bbox", [None, None, None, None])
+                    detection_disaggregation.append({
+                        "timestamp": jsonl_line.get("timestamp"),
+                        "timestamps_ns": jsonl_line.get("value").get("image_timestamp_ns"),
+                        "has_image": str(jsonl_line.get("value").get("image_timestamp_ns")) in timestamps_ns,
+                        "model": model_name,
+                        "class": detection.get("class"),
+                        "confidence": detection.get("confidence"),
+                        "x_min": bbox[0],
+                        "y_min": bbox[1],
+                        "x_max": bbox[2],
+                        "y_max": bbox[3],
+                    })
+        except AttributeError:
+            pass
+    return pd.DataFrame(detection_disaggregation)
