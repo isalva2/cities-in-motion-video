@@ -1,0 +1,15 @@
+{
+    "W06E": {
+        "northbound_before_crossing": 1264.6875,
+        "northbound_after_crossing": 435.5,
+        "southbound_after_crossing": 1484.125,
+        "southbound_before_crossing": 448.875
+    },
+    "W042": {
+        "westhbound_before_crossing": 134.125,
+        "westhbound_after_crossing": 234.5,
+        "easthbound_after_crossing": 72.3125,
+        "easthbound_before_crossing": 273.5
+    }
+
+}
