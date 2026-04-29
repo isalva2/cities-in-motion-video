@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Apr 28 22:07:58 2026
+
+@author: joaob
+"""
+
 # ── Standard library ──────────────────────────────────────────────────────────
 import json
 from pathlib import Path
@@ -40,12 +47,12 @@ DATASETS = {
     },
 }
 
-ACTIVE_DATASET = "W042_08-09-2025"
+ACTIVE_DATASET = "W065_08-17-2025"
 
 _cfg          = DATASETS[ACTIVE_DATASET]
 JSONL_PATH    = Path(_cfg["jsonl_path"])
 IMAGE_FOLDER  = Path(_cfg["image_folder"])
-SHP_PATH      = Path(r"C:\Users\joaob\Dropbox\Documents\hackaton_UIC\hackaton_project\data\SAGE_node_shapefiles\node_W042.shp")
+SHP_PATH      = Path(r"C:\Users\joaob\Dropbox\Documents\hackaton_UIC\hackaton_project\data\SAGE_node_shapefiles\node_W065.shp")
 
 MODEL_NAMES   = ["YOLOv5n", "YOLOv8n", "YOLOv10n"]
 LOCAL_TZ      = ZoneInfo("America/Chicago")
@@ -86,17 +93,21 @@ def get_period(hour: int) -> tuple[str, str]:
 # =============================================================================
 
 IMAGE_POINTS = np.float32([
-    [910,  708],
-    [1502, 708],
-    [1921, 1724],
-    [296,  1853],
+  [1396, 935],   # GCP 1
+  [1786, 899],   # GCP 2
+  [2060, 1336],  # GCP 3
+  [933, 1216],   # GCP 4
+  [527, 1429],   # GCP 5
+  [326, 1194],   # GCP 6
 ])
 
 WORLD_POINTS = np.float32([
-    [445447.469, 4617438.348],
-    [445442.892, 4617423.431],
-    [445408.560, 4617435.365],
-    [445409.454, 4617442.861],
+    [436606.877, 4649769.770],   # GCP 1
+    [436617.370, 4649763.091],   # GCP 2
+    [436591.414, 4649748.604],   # GCP 3
+    [436586.549, 4649763.644],   # GCP 4
+    [436579.372, 4649762.214],   # GCP 5
+    [436579.870, 4649774.438],   # GCP 6
 ])
 
 SHAPEFILE_EPSG = 26916
