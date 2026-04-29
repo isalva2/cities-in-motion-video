@@ -10,6 +10,12 @@
         "westhbound_after_crossing": 234.5,
         "easthbound_after_crossing": 72.3125,
         "easthbound_before_crossing": 273.5
+    },
+    "W065": {
+        "easthbound_before_crossing": 278.75,
+        "easthbound_after_crossing": 357.90625,
+        "westthbound_after_crossing": 225.625,
+        "westthbound_before_crossing": 652.9375
     }
 
 }
