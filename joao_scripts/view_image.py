@@ -1,9 +1,16 @@
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
-image_path = r"C:\Users\joaob\Dropbox\Documents\hackaton_UIC\hackaton_project\data\W042_08-09-2025\images\1754697904449759466-snapshot.jpg"
+image_path = r"C:\Users\joaob\Dropbox\Documents\hackaton_UIC\hackaton_project\data\W06E_12-02-2025\images\1764693301177844608-snapshot.jpg"
 
-img = mpimg.imread(image_path)
+# --- verify image loads before anything else ---
+try:
+    img = mpimg.imread(image_path)
+    print(f"✓ Image loaded: {img.shape}")
+except Exception as e:
+    print(f"✗ Failed to load image: {e}")
+    raise
+
 fig, ax = plt.subplots(figsize=(14, 8))
 ax.imshow(img)
 ax.set_title("Click on GCP features — crosswalk corners, lane markings, stop lines\n"
@@ -13,8 +20,8 @@ fig.patch.set_facecolor("#1a1a1a")
 ax.set_facecolor("#1a1a1a")
 
 clicked_points = []
-markers = []
-texts   = []
+markers        = []
+texts          = []
 
 def onclick(event):
     if event.inaxes != ax:
@@ -32,13 +39,13 @@ def onclick(event):
     clicked_points.append([x, y])
     n = len(clicked_points)
 
-    m = ax.plot(x, y, 'ro', markersize=8, markeredgecolor='yellow',
-                markeredgewidth=1.5)[0]
-    t = ax.text(x + 10, y - 10, f"GCP {n}\n({x}, {y})",
-                color="yellow", fontsize=8,
-                bbox=dict(facecolor="black", alpha=0.7, edgecolor="none", pad=2))
-    markers.append(m)
-    texts.append(t)
+    mk = ax.plot(x, y, 'ro', markersize=8, markeredgecolor='yellow',
+                 markeredgewidth=1.5)[0]
+    tx = ax.text(x + 10, y - 10, f"GCP {n}\n({x}, {y})",
+                 color="yellow", fontsize=8,
+                 bbox=dict(facecolor="black", alpha=0.7, edgecolor="none", pad=2))
+    markers.append(mk)
+    texts.append(tx)
     fig.canvas.draw()
     print(f"  GCP {n}: pixel ({x}, {y})")
 

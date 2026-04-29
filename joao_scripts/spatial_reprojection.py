@@ -2,7 +2,7 @@ import geopandas as gpd
 import folium
 import webbrowser
 
-shp_path = r"C:\Users\joaob\Dropbox\Documents\hackaton_UIC\hackaton_project\data\SAGE_node_shapefiles\node_W042.shp"
+shp_path = r"C:\Users\joaob\Dropbox\Documents\hackaton_UIC\hackaton_project\data\SAGE_node_shapefiles\node_W06E.shp"
 
 # Load in original CRS (EPSG:26916) to extract UTM coords too
 gdf_utm = gpd.read_file(shp_path)  # native EPSG:26916
